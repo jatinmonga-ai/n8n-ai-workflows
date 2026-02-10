@@ -51,7 +51,5 @@ This repo exists to:
 
 ## 📄 License
 
-## 📄 License
-
 Creative Commons Attribution-NonCommercial 4.0. See the [LICENSE](LICENSE) file for details.
 
