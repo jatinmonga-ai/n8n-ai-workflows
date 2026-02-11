@@ -1,1 +1,285 @@
+# Simple AI Email Automation
 
+> My first automation workflow. 4 nodes. 15 minutes. Real value.
+
+## 📋 Overview
+
+This workflow demonstrates that you don't need complexity to create value. It takes a research topic, sends it to an AI model, and emails you the generated insights—all automatically.
+
+**Perfect for:** First-time automation builders  
+**Complexity:** ⭐ Beginner  
+**Setup Time:** 15 minutes  
+**Nodes:** 4
+
+## 🎯 What This Workflow Does
+
+1. You input a research topic (e.g., "AI agents in healthcare")
+2. The workflow sends an HTTP request to Groq AI API
+3. AI generates insights on your topic
+4. Results are automatically emailed to you
+
+**No manual copying. No switching between tabs. Just trigger and receive.**
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐
+│ Manual Trigger  │  ← You click "Execute"
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Edit Fields    │  ← Define research topic
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  HTTP Request   │  ← Call Groq AI API
+│  (Groq API)     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  Send Email     │  ← Gmail delivers results
+│  (Gmail)        │
+└─────────────────┘
+```
+
+## 🔧 Setup Guide
+
+### Prerequisites
+
+- n8n account (cloud or self-hosted)
+- Groq API key ([Get one here](https://groq.com/))
+- Gmail account
+
+### Step 1: Import Workflow
+
+1. Download `workflow.json` from this folder
+2. Open your n8n instance
+3. Go to **Workflows** → **Import from File**
+4. Select the downloaded JSON file
+
+### Step 2: Configure Groq API
+
+1. Go to [groq.com](https://groq.com/) and sign up
+2. Generate an API key from your dashboard
+3. In n8n, open the **HTTP Request** node
+4. Add authentication:
+   - Type: `Generic Credential Type`
+   - Credential Type: `Header Auth`
+   - Name: `Authorization`
+   - Value: `Bearer YOUR_GROQ_API_KEY`
+
+### Step 3: Configure Gmail
+
+1. In n8n, open the **Send Email** node
+2. Click **Create New Credential**
+3. Follow the OAuth2 authentication flow
+4. Grant Gmail permissions
+5. Update the recipient email to your address
+
+### Step 4: Customize Your Topic
+
+1. Open the **Edit Fields** node
+2. Update the `topic` field with your research subject
+   - Example: "AI agents in healthcare"
+   - Example: "Latest trends in automation"
+   - Example: "Best practices for n8n workflows"
+
+### Step 5: Test Run
+
+1. Click **Execute Workflow**
+2. Watch the nodes light up as they execute
+3. Check your email inbox for AI-generated insights
+
+## 📝 Configuration Options
+
+### HTTP Request Node
+
+**Groq API Endpoint:**
+```
+POST: https://api.groq.com/openai/v1/chat/completions
+```
+
+**Request Body (Customizable):**
+```json
+{
+  "model": "mixtral-8x7b-32768",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Provide detailed insights on: {{$json.topic}}"
+    }
+  ],
+  "temperature": 0.7,
+  "max_tokens": 1000
+}
+```
+
+**Customization Options:**
+- `model`: Change AI model (e.g., `llama2-70b-4096`)
+- `temperature`: Adjust creativity (0.0 = focused, 1.0 = creative)
+- `max_tokens`: Control response length
+
+### Email Template
+
+Customize the email content in the **Send Email** node:
+
+```
+Subject: AI Research: {{$json.topic}}
+
+Hi,
+
+Here are the AI-generated insights on "{{$json.topic}}":
+
+{{$json.response}}
+
+---
+Automated by n8n
+```
+
+## 💡 Use Cases
+
+### 1. Daily Research Summaries
+- Topic: "Latest AI news"
+- Schedule: Every morning at 8 AM
+- Benefit: Stay updated without manual searching
+
+### 2. Content Idea Generation
+- Topic: "Blog post ideas about automation"
+- Schedule: Weekly on Mondays
+- Benefit: Never run out of content ideas
+
+### 3. Learning New Topics
+- Topic: "Explain quantum computing simply"
+- Schedule: On-demand
+- Benefit: Quick, digestible explanations
+
+### 4. Market Research
+- Topic: "Competitor analysis for [your industry]"
+- Schedule: Weekly
+- Benefit: Continuous competitive intelligence
+
+## 🔄 Advanced Modifications
+
+### Add Scheduling (Cron Trigger)
+
+Replace **Manual Trigger** with **Cron Trigger**:
+```
+0 8 * * *  → Every day at 8:00 AM
+0 9 * * 1  → Every Monday at 9:00 AM
+0 */6 * * * → Every 6 hours
+```
+
+### Add Multiple Topics
+
+Modify **Edit Fields** to process multiple topics:
+```json
+{
+  "topics": [
+    "AI trends 2025",
+    "Automation best practices",
+    "n8n use cases"
+  ]
+}
+```
+
+Add a **Split In Batches** node to process each topic separately.
+
+### Save to Google Sheets
+
+Add a **Google Sheets** node after the HTTP Request:
+- Action: Append Row
+- Columns: Topic | AI Insights | Timestamp
+
+This creates a searchable knowledge base over time.
+
+### Add Slack Notifications
+
+Replace/add a **Slack** node:
+- Channel: `#research-updates`
+- Message: AI insights formatted for team consumption
+
+## 🐛 Troubleshooting
+
+### Issue: "HTTP Request Failed"
+**Solution:** Check your Groq API key
+- Verify it's correctly formatted: `Bearer sk-...`
+- Ensure you have API credits remaining
+- Check Groq API status page
+
+### Issue: "Email Not Sending"
+**Solution:** Re-authenticate Gmail
+- Go to credentials → Gmail → Reconnect
+- Ensure "Less secure app access" is enabled (if using password auth)
+- Check spam folder
+
+### Issue: "Empty Response from AI"
+**Solution:** Adjust your prompt
+- Make the request more specific
+- Increase `max_tokens` in HTTP Request body
+- Try a different AI model
+
+### Issue: "Rate Limit Exceeded"
+**Solution:** Add delays
+- Insert **Wait** node between requests
+- Reduce frequency if using Cron trigger
+- Upgrade Groq API plan
+
+## 📊 What You'll Learn
+
+By building and customizing this workflow, you'll understand:
+
+- ✅ How to integrate external APIs in n8n
+- ✅ How to structure HTTP requests
+- ✅ How to handle AI model responses
+- ✅ How to automate email delivery
+- ✅ How to debug workflow errors
+- ✅ How to schedule automated tasks
+
+## 🎓 Next Steps
+
+### Ready for More?
+
+Once you're comfortable with this workflow:
+
+1. **Add more data sources** - Combine multiple AI models
+2. **Build persistence** - Save results to databases
+3. **Create conditions** - Add IF logic for smart routing
+4. **Move to [Workflow 2](../02-ai-research-agent/)** - Multi-agent system with memory
+
+### Experiment Ideas
+
+- Compare responses from different AI models
+- Create a daily digest of multiple topics
+- Build a knowledge base in Google Sheets
+- Add Slack integration for team sharing
+
+## 💬 Questions?
+
+**Stuck on setup?** Check the [main repo issues](../../issues)  
+**Want to share your version?** Submit a PR with your modifications  
+**Found a bug?** Open an issue with screenshots
+
+
+## 🎯 Success Metrics
+
+You've mastered this workflow when you can:
+
+- [ ] Import and run it successfully
+- [ ] Customize the research topic
+- [ ] Modify the AI prompt for different outputs
+- [ ] Schedule it to run automatically
+- [ ] Add a new node (like Google Sheets)
+- [ ] Debug errors independently
+
+---
+
+**Remember:** This 4-node workflow is not "too simple." It's the foundation. Master this, and everything else becomes possible.
+
+**The confidence you get from watching this workflow execute is worth more than 100 courses.**
+
+---
+
+[← Back to Main Repo](../../) | [Next: AI Research Agent →](../02-ai-research-agent/)
