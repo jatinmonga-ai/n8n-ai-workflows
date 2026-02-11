@@ -1,4 +1,4 @@
-# Simple AI Email Automation
+# Workflow 1: Simple AI Email Automation
 
 > My first automation workflow. 4 nodes. 15 minutes. Real value.
 
