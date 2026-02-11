@@ -1,0 +1,386 @@
+{
+  "name": "AI Research Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e8adcfaa-8eec-40b6-baaa-4f81f2d0d112",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "820be2bd-bcac-4e41-bfb0-253e40cecb3c",
+              "name": "topic",
+              "value": "AI Agents in Finance",
+              "type": "string"
+            },
+            {
+              "id": "6e9723ea-6dd5-4864-bb1e-366b7618198d",
+              "name": "user_email",
+              "value": "yourm email address",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6359e836-e63e-4eb3-87e7-f85b67acc8c9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "98509e34-8d0b-4df4-af95-d776b2727236",
+              "leftValue": "={{ $json.topic }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        672,
+        0
+      ],
+      "id": "e21db4ff-821a-497d-ba24-e613c87f6c5e",
+      "name": "If",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        0
+      ],
+      "id": "1bcd0536-6312-4e90-8cd4-46ad87b31a17",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9tB894cqkMGv95Iv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        944,
+        304
+      ],
+      "id": "43f4eb92-150d-4ee1-a0fe-ffe48e1a812e",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "N6jMUJp0hKKGUlnP",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Explain {{ $('Edit Fields').item.json.topic }} in simple bullet points.\n",
+        "options": {
+          "systemMessage": "You are an AI agent that explains topics clearly and simply.\n\nYour task is to produce a concise, beginner-friendly explanation in bullet points that can be saved as long-term memory.\n\nRules:\n- Do not ask questions\n- Avoid unnecessary jargon\n- Be accurate and structured\n- Only return the explanation\nYou are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        944,
+        144
+      ],
+      "id": "284e451c-e8dd-4c25-9301-4351bb3f0b2a",
+      "name": "AI Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        144
+      ],
+      "id": "b8e2caff-7db7-4341-88ad-b1ffa24a021d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9tB894cqkMGv95Iv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "your email address",
+        "subject": "={{ $json.topic }}",
+        "message": "={{ $json.summary || $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1536,
+        -16
+      ],
+      "id": "57d98d4b-8bb0-458c-83b0-2924848bec3c",
+      "name": "Send a message",
+      "webhookId": "383dfb94-b216-4b17-8c8b-4e9463cb9048",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1ihF0aQdcvm6cFzV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1296,
+        -176
+      ],
+      "id": "01c45926-6e3c-4cdf-afa7-60e23f59e804",
+      "name": "Update row in sheet"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Explain {{ $('Edit Fields').item.json.topic }} in simple bullet points.\n",
+        "options": {
+          "systemMessage": "You are an AI agent that explains topics clearly and simply.\n\nYour task is to produce a concise, beginner-friendly explanation in bullet points that can be saved as long-term memory.\n\nRules:\n- Do not ask questions\n- Avoid unnecessary jargon\n- Be accurate and structured\n- Only return the explanation\nYou are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        -176
+      ],
+      "id": "c0c49abe-14fc-466d-9467-a9da2a71dabc",
+      "name": "AI Agent1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -16
+      ],
+      "id": "57eb8f34-2e7d-4c48-81a3-e702fdb86e46",
+      "name": "Groq Chat Model"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "09e911bb-3fe9-42e1-8704-6d64cdeeaf13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b075e90966639c30b2b127d12bbcb8d563107c9cb084274d226d217c8c27b10b"
+  },
+  "id": "LOF2s1w9BMEaoBWX7wfs_",
+  "tags": []
+}
