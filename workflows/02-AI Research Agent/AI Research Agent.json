@@ -97,13 +97,7 @@
       ],
       "id": "1bcd0536-6312-4e90-8cd4-46ad87b31a17",
       "name": "Get row(s) in sheet",
-      "alwaysOutputData": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "9tB894cqkMGv95Iv",
-          "name": "Google Sheets account"
-        }
-      }
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -118,12 +112,6 @@
       ],
       "id": "43f4eb92-150d-4ee1-a0fe-ffe48e1a812e",
       "name": "Groq Chat Model1",
-      "credentials": {
-        "groqApi": {
-          "id": "N6jMUJp0hKKGUlnP",
-          "name": "Groq account"
-        }
-      }
     },
     {
       "parameters": {
@@ -164,13 +152,7 @@
         144
       ],
       "id": "b8e2caff-7db7-4341-88ad-b1ffa24a021d",
-      "name": "Append row in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "9tB894cqkMGv95Iv",
-          "name": "Google Sheets account"
-        }
-      }
+      "name": "Append row in sheet"
     },
     {
       "parameters": {
@@ -186,14 +168,7 @@
         -16
       ],
       "id": "57d98d4b-8bb0-458c-83b0-2924848bec3c",
-      "name": "Send a message",
-      "webhookId": "383dfb94-b216-4b17-8c8b-4e9463cb9048",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "1ihF0aQdcvm6cFzV",
-          "name": "Gmail account"
-        }
-      }
+      "name": "Send a message"
     },
     {
       "parameters": {
@@ -378,8 +353,7 @@
   },
   "versionId": "09e911bb-3fe9-42e1-8704-6d64cdeeaf13",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "b075e90966639c30b2b127d12bbcb8d563107c9cb084274d226d217c8c27b10b"
+    "templateCredsSetupCompleted": true
   },
   "id": "LOF2s1w9BMEaoBWX7wfs_",
   "tags": []
