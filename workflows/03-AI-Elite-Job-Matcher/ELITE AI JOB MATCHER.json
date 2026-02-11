@@ -42,7 +42,7 @@
           "parameters": [
             {
               "name": "app_id",
-              "value": "bfb56d48"
+              "value": "your id"
             },
             {
               "name": "app_key",
@@ -229,13 +229,7 @@
       ],
       "id": "edecabf9-fc1b-4fb7-899a-8e508618ba55",
       "name": "Get row(s) in sheet",
-      "alwaysOutputData": false,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "9tB894cqkMGv95Iv",
-          "name": "Google Sheets account"
-        }
-      }
+      "alwaysOutputData": false
     },
     {
       "parameters": {
@@ -258,13 +252,7 @@
         -192
       ],
       "id": "549efad2-a4b2-42f2-b99d-d8ac63265368",
-      "name": "Append or update row in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "9tB894cqkMGv95Iv",
-          "name": "Google Sheets account"
-        }
-      }
+      "name": "Append or update row in sheet"
     },
     {
       "parameters": {
@@ -293,14 +281,7 @@
         -304
       ],
       "id": "5b967d22-ebeb-42c6-a6f0-1c49a879fdf3",
-      "name": "Send a message",
-      "webhookId": "3504dad6-4760-4284-9681-20ed56fddd48",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "1ihF0aQdcvm6cFzV",
-          "name": "Gmail account"
-        }
-      }
+      "name": "Send a message"
     },
     {
       "parameters": {
@@ -557,8 +538,7 @@
   },
   "versionId": "516c0596-7c5a-405e-9af6-45c4bcc694e5",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "b075e90966639c30b2b127d12bbcb8d563107c9cb084274d226d217c8c27b10b"
+    "templateCredsSetupCompleted": true
   },
   "id": "GX6_aG0LyiaAxRLle0KYk",
   "tags": []
