@@ -1,0 +1,565 @@
+{
+  "name": "ELITE AI JOB MATCHER",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 9 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        0
+      ],
+      "id": "823c8e20-9c32-425b-ab7c-b54a7deee46b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      score_threshold: 7, // Only show jobs scoring 7 or higher\n      max_results_per_source: 15, // Fetch 15 from each source\n\n      my_skills: `\nSKILLS:\n- Programming: Python (Pandas, NumPy, Matplotlib, Seaborn), SQL (PostgreSQL, MySQL)\n- Data Tools: Jupyter Notebook, Git/GitHub, Excel, data visualization\n- AI/Automation: n8n, Groq API, LLM integration, workflow automation\n- Engineering: AutoCAD, SolidWorks, CATIA, CNC programming\n- Soft Skills: Communication, training, operations management, data accuracy\n\nEXPERIENCE:\n- 5 years warehouse operations (inventory systems, data tracking)\n- 1 year sales/marketing (client communication, presentations)\n- Mechanical engineering diploma with technical projects\n\nTARGET ROLES:\n- Data Analyst (junior/entry)\n- Business Analyst\n- Operations Analyst\n\nPREFERENCES:\n- Remote or Canada\n- Tech, e-commerce, or healthcare companies\n      `,\n\n      search_terms: [\n        \"data analyst\",\n        \"junior data analyst\",\n        \"business analyst\",\n        \"operations analyst\"\n      ],\n\n      must_have_keywords: [\"python\", \"sql\", \"data\", \"analyst\"]\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "065f7f06-b65c-4e4a-81d4-37295b654aea",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "https://api.adzuna.com/v1/api/jobs/ca/search/1",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "app_id",
+              "value": "bfb56d48"
+            },
+            {
+              "name": "app_key",
+              "value": "your key"
+            },
+            {
+              "name": "results_per_page",
+              "value": "={{$json.max_results_per_source}}"
+            },
+            {
+              "name": "what",
+              "value": "data analyst"
+            },
+            {
+              "name": "where",
+              "value": "canada"
+            },
+            {
+              "name": "max_days_old",
+              "value": "7"
+            },
+            {
+              "name": "sort_by",
+              "value": "date"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "de45e713-c987-4b67-bb66-1cff7723eeea",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://remotive.com/api/remote-jobs",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "category",
+              "value": "software"
+            },
+            {
+              "name": "search",
+              "value": "data analyst"
+            },
+            {
+              "name": "limit",
+              "value": "={{$json.max_results_per_source}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        112
+      ],
+      "id": "294e40f0-9859-41b8-b417-5cf36e784094",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get current job being processed\nconst job = $json;\n\n// Get ALL items from input\nconst mergeInputs = $input.all();\n\n// Debug: Log what we're working with\nconsole.log('Current job:', JSON.stringify(job, null, 2));\nconsole.log('Total merge inputs:', mergeInputs.length);\nconsole.log('First few inputs:', JSON.stringify(mergeInputs.slice(0, 3), null, 2));\n\n// Build Set of seen job keys\nconst seenJobsSet = new Set();\n\nmergeInputs.forEach(item => {\n  const row = item.json;\n  if (row && row.title && row.company) {\n    const key = `${row.title.toLowerCase().trim()}|||${row.company.toLowerCase().trim()}`;\n    seenJobsSet.add(key);\n  }\n});\n\n// Debug: Show what's in the seen set\nconsole.log('Seen jobs count:', seenJobsSet.size);\nconsole.log('First 5 seen job keys:', Array.from(seenJobsSet).slice(0, 5));\n\n// Create key for current job\nconst jobKey = `${job.title?.toLowerCase().trim()}|||${job.company?.toLowerCase().trim()}`;\nconsole.log('Current job key:', jobKey);\nconsole.log('Is duplicate?', seenJobsSet.has(jobKey));\n\n// TEMPORARILY: Return the job regardless (for testing)\nreturn [{ json: {\n  ...job,\n  is_duplicate: seenJobsSet.has(jobKey),\n  seen_count: seenJobsSet.size\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        -192
+      ],
+      "id": "b07861e2-7ff3-418d-ac84-4d153dfbca5c",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        704,
+        0
+      ],
+      "id": "3a5c65c5-0e74-4f87-8fbe-431631c0f3b6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the current job\nconst job = $json;\n\n// Expanded keywords to catch more jobs\nconst mustHaveKeywords = [\n  \"python\", \"sql\", \"data\", \"analyst\", \n  \"analytics\", \"business intelligence\", \"reporting\",\n  \"excel\", \"tableau\", \"powerbi\", \"database\",\n  \"coordinator\", \"operations\" // Added based on your experience\n];\n\n// Get job description and title (lowercase for matching)\nconst description = (job.description || '').toLowerCase();\nconst title = (job.title || '').toLowerCase();\n\n// Combine title + description for keyword checking\nconst searchText = `${title} ${description}`;\n\n// Debug\nconsole.log('Checking job:', job.title);\nconsole.log('Search text:', searchText.substring(0, 200));\n\n// Check if job mentions ANY keyword\nconst hasRequiredKeywords = mustHaveKeywords.some(keyword => \n  searchText.includes(keyword.toLowerCase())\n);\n\nconsole.log('Has required keywords?', hasRequiredKeywords);\n\nif (hasRequiredKeywords) {\n  return [{ json: job }];\n} else {\n  return [];\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        -192
+      ],
+      "id": "fe14ef5b-0694-4c5c-a841-b698f8a0ed70",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the AI response from Groq\nconst groqResponse = $json;\nconst aiResponse = groqResponse.choices[0].message.content;\n\n// Get the original job data from the previous \"Build AI Prompt\" node\nconst promptNode = $('Build AI Prompt').first().json;\nconst jobData = promptNode.job_data;\n\n// Get threshold from config\nconst config = $('Code in JavaScript').first().json;\nconst threshold = config.score_threshold || 7;\n\n// Parse the AI response\nlet evaluation;\ntry {\n  // Clean up any markdown formatting\n  const cleaned = aiResponse.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\n  evaluation = JSON.parse(cleaned);\n} catch (e) {\n  console.error('Failed to parse AI response:', aiResponse);\n  // Fallback if parsing fails\n  evaluation = {\n    score: 5,\n    reasoning: \"Could not parse AI evaluation - check AI response format\",\n    skill_gaps: \"Unknown\",\n    recommendation: \"SKIP\"\n  };\n}\n\n// Log for debugging\nconsole.log('Job:', jobData.title);\nconsole.log('AI Score:', evaluation.score);\nconsole.log('Reasoning:', evaluation.reasoning);\nconsole.log('Meets threshold (≥' + threshold + '):', evaluation.score >= threshold);\n\n// Return job with AI evaluation\nreturn [{\n  json: {\n    ...jobData,\n    match_score: evaluation.score,\n    reasoning: evaluation.reasoning,\n    skill_gaps: evaluation.skill_gaps,\n    recommendation: evaluation.recommendation,\n    meets_threshold: evaluation.score >= threshold\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2176,
+        -192
+      ],
+      "id": "fa940455-d714-4f22-bfef-a043f0de05c6",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "44b18c8a-32fa-4a8d-a58c-01ce67b39b59",
+              "leftValue": "={{$json.score}}",
+              "rightValue": "={{$('Code in JavaScript').first().json.score_threshold}}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2528,
+        -192
+      ],
+      "id": "b97cbe46-18bd-42c9-9f55-dc469cdf787f",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1264,
+        -192
+      ],
+      "id": "ccdd123f-9f2f-4281-b0d3-bc846f650955",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "edecabf9-fc1b-4fb7-899a-8e508618ba55",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9tB894cqkMGv95Iv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2368,
+        -192
+      ],
+      "id": "549efad2-a4b2-42f2-b99d-d8ac63265368",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9tB894cqkMGv95Iv",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the scored job (already filtered - only high scores here)\nconst job = $json;\n\n// Get config\nconst config = $('Code in JavaScript').first().json;\nconst threshold = config.score_threshold || 7;\nconst today = new Date().toISOString().split('T')[0];\n\n// Use 'score' instead of 'match_score' (based on what you said)\nconst scoreClass = job.score >= 9 ? 'excellent' : 'good';\nconst recClass = job.recommendation === 'APPLY' ? 'apply' : 'maybe';\n\nconst htmlEmail = `\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; }\n    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }\n    .job-card { \n      background: #f8fafc; \n      border-left: 4px solid #3b82f6; \n      padding: 20px; \n      margin: 20px 0; \n      border-radius: 6px;\n      box-shadow: 0 1px 3px rgba(0,0,0,0.1);\n    }\n    .score { \n      display: inline-block;\n      background: #10b981;\n      color: white;\n      padding: 6px 14px;\n      border-radius: 20px;\n      font-weight: bold;\n      font-size: 15px;\n    }\n    .score.excellent { background: #059669; }\n    .score.good { background: #10b981; }\n    .job-title { color: #1e40af; font-size: 20px; font-weight: bold; margin: 12px 0; }\n    .company { color: #64748b; font-size: 15px; margin: 8px 0; }\n    .recommendation { \n      display: inline-block;\n      padding: 4px 10px;\n      border-radius: 12px;\n      font-size: 13px;\n      font-weight: 600;\n      margin-left: 10px;\n    }\n    .recommendation.apply { background: #dcfce7; color: #166534; }\n    .recommendation.maybe { background: #fef3c7; color: #92400e; }\n    .apply-btn {\n      display: inline-block;\n      background: #2563eb;\n      color: white;\n      padding: 12px 24px;\n      text-decoration: none;\n      border-radius: 6px;\n      margin-top: 12px;\n      font-weight: 600;\n    }\n    .apply-btn:hover { background: #1d4ed8; }\n  </style>\n</head>\n<body>\n  <div class=\"header\">\n    <h1 style=\"margin: 0;\">🎯 New Quality Job Match Found</h1>\n    <p style=\"margin: 10px 0 0 0; opacity: 0.9;\">Score: ${job.score}/10 • ${today}</p>\n  </div>\n  \n  <div class=\"job-card\">\n    <div style=\"display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;\">\n      <div>\n        <span class=\"score ${scoreClass}\">${job.score}/10</span>\n        <span class=\"recommendation ${recClass}\">${job.recommendation}</span>\n      </div>\n    </div>\n    \n    <div class=\"job-title\">${job.title}</div>\n    <div class=\"company\">\n      🏢 ${job.company} • 📍 ${job.location} • 💰 ${job.salary}\n    </div>\n    <div style=\"color: #94a3b8; font-size: 13px; margin-top: 5px;\">\n      Source: ${job.source}\n    </div>\n    \n    <div style=\"margin: 15px 0; padding: 12px; background: white; border-radius: 4px;\">\n      <strong style=\"color: #475569;\">Why this matches:</strong>\n      <p style=\"margin: 8px 0 0 0; color: #64748b;\">${job.reasoning}</p>\n    </div>\n    \n    ${job.skill_gaps !== 'None' && job.skill_gaps !== 'none' ? `\n      <div style=\"background: #fef3c7; padding: 10px; border-radius: 4px; margin: 10px 0;\">\n        <span style=\"color: #92400e;\">⚠️ <strong>Skill gaps:</strong> ${job.skill_gaps}</span>\n      </div>\n    ` : `\n      <div style=\"background: #dcfce7; padding: 10px; border-radius: 4px; margin: 10px 0;\">\n        <span style=\"color: #166534;\">✓ <strong>No major skill gaps</strong></span>\n      </div>\n    `}\n    \n    <a href=\"${job.url}\" class=\"apply-btn\" target=\"_blank\">View Job & Apply →</a>\n  </div>\n  \n  <hr style=\"margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;\">\n  <p style=\"color: #94a3b8; font-size: 14px; text-align: center;\">\n    Generated by your AI Job Matcher v2.0<br>\n    Threshold: ${threshold}/10 • Deduplicated • AI-Scored\n  </p>\n</body>\n</html>\n`;\n\nreturn [{\n  json: {\n    html_email: htmlEmail,\n    subject: `🎯 Quality Job Match: ${job.title} (${job.score}/10)`,\n    has_job: true\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2736,
+        -288
+      ],
+      "id": "23ed9f45-2c75-4b92-849b-26c22764d302",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "sendTo": "your email id",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html_email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2944,
+        -304
+      ],
+      "id": "5b967d22-ebeb-42c6-a6f0-1c49a879fdf3",
+      "name": "Send a message",
+      "webhookId": "3504dad6-4760-4284-9681-20ed56fddd48",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1ihF0aQdcvm6cFzV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "authorization",
+              "value": "Bearer Your API KEY"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"model\": \"llama-3.1-8b-instant\", \"messages\": [ { \"role\": \"user\", \"content\": {{ JSON.stringify($json.ai_prompt) }} } ], \"max_tokens\": 400, \"temperature\": 0.3 }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2000,
+        -192
+      ],
+      "id": "7b839540-d639-462f-8616-a0ef87d09cf9",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const adzunaJobs = $input.first().json.results || [];\nconst remotiveJobs = $input.last().json.jobs || [];\n\n// Normalize Adzuna format\nconst normalizedAdzuna = adzunaJobs.map(job => ({\n  source: 'Adzuna',\n  job_id: `adzuna_${job.id}`,\n  title: job.title,\n  company: job.company?.display_name || 'Unknown',\n  location: job.location?.display_name || 'Remote',\n  description: job.description,\n  url: job.redirect_url,\n  salary: job.salary_max ? `$${job.salary_min || 0}-$${job.salary_max}` : 'Not specified',\n  posted_date: job.created || new Date().toISOString()\n}));\n\n// Normalize Remotive format\nconst normalizedRemotive = remotiveJobs.map(job => ({\n  source: 'Remotive',\n  job_id: `remotive_${job.id}`,\n  title: job.title,\n  company: job.company_name,\n  location: 'Remote',\n  description: job.description,\n  url: job.url,\n  salary: job.salary || 'Not specified',\n  posted_date: job.publication_date || new Date().toISOString()\n}));\n\n// Combine both sources\nconst allJobs = [...normalizedAdzuna, ...normalizedRemotive];\n\nreturn allJobs.map(job => ({ json: job }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        0
+      ],
+      "id": "9578ca63-dced-4875-89a7-d8980b8e1627",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the current job\nconst job = $json;\n\n// Get your skills profile from config\nconst config = $('Code in JavaScript').first().json;\n\n// Build the AI prompt\nconst prompt = `You are an expert career advisor evaluating job matches.\n\nCANDIDATE PROFILE:\n${config.my_skills}\n\nJOB POSTING:\nTitle: ${job.title}\nCompany: ${job.company}\nLocation: ${job.location}\nSalary: ${job.salary}\nDescription: ${job.description}\n\nEVALUATION CRITERIA:\nRate this job match on a scale of 1-10:\n- 1-3: Poor match (missing most required skills, wrong experience level)\n- 4-6: Moderate match (have some skills, missing key requirements)\n- 7-8: Good match (have most required skills, minor gaps)\n- 9-10: Excellent match (have all required skills, strong fit)\n\nConsider:\n- Technical skills match (Python, SQL, data analysis)\n- Experience level fit (junior/entry roles preferred)\n- Transferable skills from warehouse operations and sales\n- Engineering background relevance\n- Location/remote preference alignment\n\nRESPOND ONLY IN THIS EXACT JSON FORMAT (no markdown, no extra text):\n{\n  \"score\": <number 1-10>,\n  \"reasoning\": \"<2-3 sentences explaining the score>\",\n  \"skill_gaps\": \"<comma-separated list of missing skills, or 'None'>\",\n  \"recommendation\": \"<APPLY or SKIP or MAYBE>\"\n}`;\n\nreturn [{\n  json: {\n    job_data: job,\n    ai_prompt: prompt\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        -192
+      ],
+      "id": "9a7acf1f-be12-4152-a2dd-07f3973a7424",
+      "name": "Build AI Prompt"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Build AI Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "516c0596-7c5a-405e-9af6-45c4bcc694e5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b075e90966639c30b2b127d12bbcb8d563107c9cb084274d226d217c8c27b10b"
+  },
+  "id": "GX6_aG0LyiaAxRLle0KYk",
+  "tags": []
+}
